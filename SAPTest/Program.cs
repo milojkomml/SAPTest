@@ -52,11 +52,11 @@ namespace SAPTest
             //    Console.WriteLine("Hotel size is: " + size);
             //}
 
-            //solution.TestCase1();
-            //solution.TestCase2();
-            //solution.TestCase3();
-            //solution.TestCase4();
-            //solution.TestCase5();
+            solution.TestCase1();
+            solution.TestCase2();
+            solution.TestCase3();
+            solution.TestCase4();
+            solution.TestCase5();
             solution.TestCase6();
         }
 
@@ -84,39 +84,21 @@ namespace SAPTest
                 var listOfAvaliableRooms = new List<Room>();
                 // check if we have room avaliable for all days
                 bool avaliableForAllDays = true;
-                bool dayForBookingIsFound = false;
-                bool bookingRequestIsValid = true;
-                bool bookingRequestIsConfirmed = false;
-                int dayForBooking = 0;
-
-                var sortedListOfBookings = listOfBookings.OrderBy(z => z.StartDay).ToList();
-
-                if (startDate < 0 || endDate < 0)
-                {
-                    Console.WriteLine("Start or end date cant be negative!");
-                }
-                else if(startDate > 365 || endDate > 365)
-                {
-                    Console.WriteLine("Start or end date cant be larger then 365, we accept bookings for only next 365 days");
-                }
 
                 foreach (var b in listOfBookings)
                 {
                     startDate = b.StartDay;
                     endDate = b.EndDay;
-                    dayForBookingIsFound = false;
-                    bookingRequestIsValid = true;
-                    bookingRequestIsConfirmed = false;
 
                     if (startDate < 0 || endDate < 0)
                     {
                         Console.WriteLine("Start or end date cant be negative!");
-                        bookingRequestIsValid = false;
+                        return listOfBookings;
                     }
                     if (startDate > 365 || endDate > 365)
                     {
                         Console.WriteLine("Start or end date cant be larger then 365, we accept bookings for only next 365 days");
-                        bookingRequestIsValid = false;
+                        return listOfBookings;
                     }
 
                     for (int i = startDate; i <= endDate; i++)
@@ -124,51 +106,32 @@ namespace SAPTest
                         daysStaying.Add(i);
                     }
 
-                    //TODO
                     listOfAvaliableRooms.Clear();
 
                     foreach (var room in rooms)
                     {
                         avaliableForAllDays = true;
-                        if (dayForBookingIsFound == false && bookingRequestIsValid == true)
+                        foreach (var x in daysStaying)
                         {
-                            foreach (var x in daysStaying)
+                            if (room.FreeDays[x] == 0 && avaliableForAllDays == true)
                             {
-                                if (room.FreeDays[x] == 0 && avaliableForAllDays == true)
+                                if (x == endDate)
                                 {
-                                    dayForBooking = room.IdRoom;
-                                    if (x == endDate)
-                                    {
-                                        //dayForBookingIsFound = true;
-                                        //Console.WriteLine("Booked room is Room " + room.IdRoom);
-                                        b.Status = true;
-                                    }
-                                }
-                                else
-                                {
-                                    avaliableForAllDays = false;
+                                    b.Status = true;
                                 }
                             }
-                        }
-                        else
-                        {
-
-                            break;
+                            else
+                            {
+                                avaliableForAllDays = false;
+                                break; 
+                            }
                         }
                         if (avaliableForAllDays == true)
                         {
                             listOfAvaliableRooms.Add(room);
-                            //foreach (var x in daysStaying)
-                            //{
-                            //    if (dayForBooking == room.IdRoom)
-                            //    {
-                            //        room.FreeDays.SetValue(1, x);
-                            //    }
-                            //}
-                            if(daysStaying[0] > 0)
+                            if (daysStaying[0] > 0)
                             {
                                 int index = daysStaying[0] - 1;
-                                //Console.WriteLine("Index is: " + index);
 
                                 if (room.FreeDays[index] == 1)
                                 {
@@ -177,32 +140,16 @@ namespace SAPTest
                                 }
                             }
                         }
-                        
-                    }
-                    //Added part for room management
-                    foreach (var ar in listOfAvaliableRooms)
-                    {
-                        if (bookingRequestIsConfirmed == false)
-                        {
-                            foreach (var d in daysStaying)
-                            {
-                                ar.FreeDays.SetValue(1, d);
-                                bookingRequestIsConfirmed = true;
-                            }
-                            break;
-                        }
-                        else 
-                        {
-                            foreach (var d in daysStaying)
-                            {
-                                ar.FreeDays.SetValue(1, d);
-                                bookingRequestIsConfirmed = true;
-                                break;
-                            }
-                        }
-                    }
 
-                    //End of part for room management
+                    }
+                    if (listOfAvaliableRooms.Count > 0)
+                    {
+                        var a = listOfAvaliableRooms[0];
+                        foreach (var d in daysStaying)
+                        {
+                            a.FreeDays.SetValue(1, d);
+                        }
+                    }
 
                     daysStaying.Clear();
                     if (b.Status == true)
@@ -222,7 +169,7 @@ namespace SAPTest
                 rooms.Add(new Room { IdRoom = 1 });
 
                 List<Booking> listOfBookings = new List<Booking>();
-                listOfBookings.Add(new Booking { IdBooking = 1,  StartDay = -4, EndDay = 2 });
+                listOfBookings.Add(new Booking { IdBooking = 1, StartDay = -4, EndDay = 2 });
 
                 ReserveHotelRoom(rooms, listOfBookings);
             }
